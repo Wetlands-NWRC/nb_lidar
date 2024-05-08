@@ -1,0 +1,13 @@
+name: C:\Users\rhamilton\LiDAR\working\10-github\nb_lidar\.conda
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - black
+  - geemap
+  - geopandas
+  - matplotlib
+  - ipykernel
+  - python-dotenv
+prefix: C:\Users\rhamilton\LiDAR\working\10-github\nb_lidar\.conda
