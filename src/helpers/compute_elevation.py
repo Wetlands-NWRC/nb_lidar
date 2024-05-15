@@ -6,7 +6,9 @@ from tagee import terrainAnalysis
 import smoothening as smthn
 
 
-def compute_bbox_from_geometry(table: ee.Geometry | ee.FeatureCollection) -> ee.Geometry:
+def compute_bbox_from_geometry(
+    table: ee.Geometry | ee.FeatureCollection,
+) -> ee.Geometry:
     if isinstance(table, ee.FeatureCollection):
         geom = table.geometry()
 
@@ -26,11 +28,19 @@ def compute_bbox_from_geometry(table: ee.Geometry | ee.FeatureCollection) -> ee.
 
 def compute_elevation_w_gussian(elevation, bbox) -> ee.Image:
     bands = ["Elevation", "Slope", "GaussianCurvature"]
-    elevation_w_filter = smthn.apply_guassian_kernel(elevation.select(0)).rename('elevation')
+    elevation_w_filter = smthn.apply_guassian_kernel(elevation.select(0)).rename(
+        "elevation"
+    )
     return terrainAnalysis(elevation_w_filter, bbox).select(bands)
 
 
 def compute_elevation_w_pm(elevation, bbox) -> ee.Image:
-    bands = [ "HorizontalCurvature", "VerticalCurvature", "MeanCurvature",]
-    elevation_w_filter = smthn.apply_peronal_malik(elevation.select(0)).rename('elevation')
+    bands = [
+        "HorizontalCurvature",
+        "VerticalCurvature",
+        "MeanCurvature",
+    ]
+    elevation_w_filter = smthn.apply_peronal_malik(elevation.select(0)).rename(
+        "elevation"
+    )
     return terrainAnalysis(elevation_w_filter, bbox).select(bands)

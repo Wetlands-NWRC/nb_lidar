@@ -4,23 +4,22 @@ import ee
 import ee.batch
 
 
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Dataset
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 class Sentinel2TOA(ee.ImageCollection):
     def __init__(self):
         super().__init__("COPERNICUS/S2_HARMONIZED")
 
     def addNDVI(self):
         return self.map(self.compute_and_add_ndvi)
-    
+
     def applyCloudMask(self):
         return self.map(self.cloud_mask)
-    
+
     @staticmethod
     def compute_and_add_ndvi(image: ee.Image):
-        return image.addBands(image.normalizedDifference(['B8', 'B4']).rename('NDVI'))
+        return image.addBands(image.normalizedDifference(["B8", "B4"]).rename("NDVI"))
 
     @staticmethod
     def cloud_mask(image: ee.Image):
@@ -38,9 +37,10 @@ class Sentinel2TOA(ee.ImageCollection):
         return image.updateMask(mask)
 
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Helpers
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 
 def get_names(prefix: str, frequencies: list[int]) -> list[str]:
     return [f"{prefix}_{freq}" for freq in frequencies]
@@ -94,10 +94,10 @@ def compute_fourier_transform(aoi, start, end, modes: int = 3):
     frequencies = list(range(1, modes + 1))
     cos_names = get_names("cos", frequencies)
     sin_names = get_names("sin", frequencies)
-    
+
     independents = ["t", "constant"] + cos_names + sin_names
-    dependent = 'NDVI'
-    
+    dependent = "NDVI"
+
     dataset = (
         Sentinel2TOA()
         .filterDate(start, str(int(end) + 1))
@@ -108,18 +108,18 @@ def compute_fourier_transform(aoi, start, end, modes: int = 3):
         .map(add_time)
         .map(add_harmonics(frequencies, cos_names, sin_names))
     )
-    
-    trend =  dataset.select(independents + [dependent]).reduce(
+
+    trend = dataset.select(independents + [dependent]).reduce(
         ee.Reducer.linearRegression(len(independents), 1)
     )
-    
+
     coefficients = (
         trend.select("coefficients").arrayProject([0]).arrayFlatten([independents])
     )
-    
+
     # add coefficients to each image in the dataset
     dataset = dataset.select(dependent).map(lambda x: x.addBands(coefficients))
-    
+
     for cos, sin in zip(cos_names, sin_names):
         dataset = dataset.map(compute_phase(cos, sin)).map(compute_amplitude(cos, sin))
 

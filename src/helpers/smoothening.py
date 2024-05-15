@@ -1,12 +1,16 @@
 import ee
 
 
-def apply_guassian_kernel(image: ee.Image, radius: int = 3, sigma: int = 2) -> ee.kernel.Kernel:
-    kernel = ee.Kernel.gaussian(radius=radius, sigma=sigma, units='pixels', normalize=True, magnitude=1.0)
+def apply_guassian_kernel(
+    image: ee.Image, radius: int = 3, sigma: int = 2
+) -> ee.kernel.Kernel:
+    kernel = ee.Kernel.gaussian(
+        radius=radius, sigma=sigma, units="pixels", normalize=True, magnitude=1.0
+    )
     return image.convolve(kernel)
 
 
-def apply_peronal_malik(img: ee.Image, K = 3.5, iterations=10, method=2) -> ee.Image:
+def apply_peronal_malik(img: ee.Image, K=3.5, iterations=10, method=2) -> ee.Image:
     dxW = ee.Kernel.fixed(3, 3, [[0, 0, 0], [1, -1, 0], [0, 0, 0]])
     dxE = ee.Kernel.fixed(3, 3, [[0, 0, 0], [0, -1, 1], [0, 0, 0]])
     dyN = ee.Kernel.fixed(3, 3, [[0, 1, 0], [0, -1, 0], [0, 0, 0]])
@@ -38,18 +42,10 @@ def apply_peronal_malik(img: ee.Image, K = 3.5, iterations=10, method=2) -> ee.I
             )
 
         else:
-            cW = ee.Image(1.0).divide(
-                ee.Image(1.0).add(dI_W.multiply(dI_W).divide(k2))
-            )
-            cE = ee.Image(1.0).divide(
-                ee.Image(1.0).add(dI_E.multiply(dI_E).divide(k2))
-            )
-            cN = ee.Image(1.0).divide(
-                ee.Image(1.0).add(dI_N.multiply(dI_N).divide(k2))
-            )
-            cS = ee.Image(1.0).divide(
-                ee.Image(1.0).add(dI_S.multiply(dI_S).divide(k2))
-            )
+            cW = ee.Image(1.0).divide(ee.Image(1.0).add(dI_W.multiply(dI_W).divide(k2)))
+            cE = ee.Image(1.0).divide(ee.Image(1.0).add(dI_E.multiply(dI_E).divide(k2)))
+            cN = ee.Image(1.0).divide(ee.Image(1.0).add(dI_N.multiply(dI_N).divide(k2)))
+            cS = ee.Image(1.0).divide(ee.Image(1.0).add(dI_S.multiply(dI_S).divide(k2)))
 
             img = img.add(
                 ee.Image(lamb).multiply(
@@ -61,3 +57,7 @@ def apply_peronal_malik(img: ee.Image, K = 3.5, iterations=10, method=2) -> ee.I
             )
 
     return img
+
+
+def make_boxcar(radius: int = 1):
+    return ee.Kernel.square(1)
