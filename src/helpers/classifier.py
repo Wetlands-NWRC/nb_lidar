@@ -54,26 +54,30 @@ class SmileRandomForest:
         return instance
 
 
-def train_smile_random_forest(train_features, class_property, predictors: list[str], **hyper_prams) -> ee.classifier.Classifier:
+def train_smile_random_forest(
+    train_features, class_property, predictors: list[str], **hyper_prams
+) -> ee.classifier.Classifier:
     """creates and trains rf model"""
-    default_hypter = {
-        
-    }
-    
+    default_hypter = {}
+
     default_hypter.update(hyper_prams)
-    
-    rf_model = (
-        ee.Classifier.smileRandomForest(**default_hypter)
-        .train(train_features, class_property, predictors)
+
+    rf_model = ee.Classifier.smileRandomForest(**default_hypter).train(
+        train_features, class_property, predictors
     )
-    
+
     return rf_model
+
 
 def _matrix_to_table(confusion_matrix: ee.confusionmatrix.ConfusionMatrix):
     pass
 
-def assess_model(model: ee.classifier.Classifier, test: ee.FeatureCollection) -> ee.FeatureCollection:
+
+def assess_model(
+    model: ee.classifier.Classifier, test: ee.FeatureCollection
+) -> ee.FeatureCollection:
     pass
+
 
 def predict(model: str | ee.classifier.Classifier, image: ee.Image):
     if isinstance(model, str):
@@ -82,7 +86,7 @@ def predict(model: str | ee.classifier.Classifier, image: ee.Image):
 
 
 def train_and_assess_model(features):
-    train = features.filter('random <= 0.7')
-    test = features.filter('random > 0.7')
+    train = features.filter("random <= 0.7")
+    test = features.filter("random > 0.7")
     model = train_smile_random_forest()
     error_matrix = assess_model
