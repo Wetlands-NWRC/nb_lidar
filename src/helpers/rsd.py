@@ -5,6 +5,45 @@ from src.helpers.calcs import RasterCalc
 from src.helpers.smoothening import make_boxcar
 
 
+class DataCubeCollection(ee.ImageCollection):
+    def __init__(self):
+        super().__init__(
+            "projects/fpca-336015/assets/cnwi-datasets/aoi_newbrunswick/datacube"
+        )
+    
+
+class Sentinel1Collection(ee.ImageCollection):
+    def __init__(self, args: list[str] = None):
+        args = args or "COPERNICUS/S1_GRD"
+        super().__init__(args)
+
+    def applyEdgeMask(self):
+        return self.map(self.edge_mask)
+
+    def filterDV(self):
+        return self.filter(
+            ee.Filter.listContains("transmitterReceiverPolarisation", "VV")
+        ).filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VH"))
+
+    def filterIWMode(self):
+        return self.filter(ee.Filter.eq("instrumentMode", "IW"))
+
+    def filterDesc(self):
+        return self.filter(ee.Filter.eq("orbitProperties_pass", "DESCENDING"))
+
+    def filterAsc(self):
+        return self.filter(ee.Filter.eq("orbitProperties_pass", "ASCENDING"))
+
+    def filterDayOfYear(self, start: int, end: int):
+        return self.filter(ee.Filter.dayOfYear(start, end))
+
+    @staticmethod
+    def edge_mask(image: ee.Image):
+        edge = image.lt(-30.0)
+        masked_image = image.mask().And(edge.Not())
+        return image.updateMask(masked_image)
+
+
 class DataCube:
     def __init__(self) -> None:
         self.dataset = ee.ImageCollection(
@@ -200,5 +239,3 @@ class TerrrainProdcutLayersFactory:
         if dataset is None:
             raise ValueError("Type must me dtm, dsm, srtm")
         return dataset()
-
-

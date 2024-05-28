@@ -3,6 +3,7 @@ import ee.batch
 
 from src.utils.datautils import monitor_task
 
+
 class SmileRandomForest:
 
     def __init__(self, ntrees: int = 10) -> None:
@@ -42,7 +43,7 @@ class SmileRandomForest:
             classifier=self.model, assetId=asset_id
         )
         task.start()
-        
+
         return task
 
     @staticmethod
@@ -51,3 +52,37 @@ class SmileRandomForest:
         instance = SmileRandomForest()
         instance.model = loaded_model
         return instance
+
+
+def train_smile_random_forest(train_features, class_property, predictors: list[str], **hyper_prams) -> ee.classifier.Classifier:
+    """creates and trains rf model"""
+    default_hypter = {
+        
+    }
+    
+    default_hypter.update(hyper_prams)
+    
+    rf_model = (
+        ee.Classifier.smileRandomForest(**default_hypter)
+        .train(train_features, class_property, predictors)
+    )
+    
+    return rf_model
+
+def _matrix_to_table(confusion_matrix: ee.confusionmatrix.ConfusionMatrix):
+    pass
+
+def assess_model(model: ee.classifier.Classifier, test: ee.FeatureCollection) -> ee.FeatureCollection:
+    pass
+
+def predict(model: str | ee.classifier.Classifier, image: ee.Image):
+    if isinstance(model, str):
+        model = ee.Classifier.load(model)
+    return image.classify(model)
+
+
+def train_and_assess_model(features):
+    train = features.filter('random <= 0.7')
+    test = features.filter('random > 0.7')
+    model = train_smile_random_forest()
+    error_matrix = assess_model

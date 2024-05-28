@@ -1,29 +1,32 @@
 import ee
 
+
 class RasterCalc:
-    
+
     def __call__(self, image: ee.Image) -> ee.Any:
         return self.add(image)
 
     def add(self, image: ee.Image):
         return image.addBands(self.compute(image))
-    
+
     def compute(self, image: ee.Image):
         # compute logic goes here
         pass
+
 
 class NDVI(RasterCalc):
     def __init__(self, nir: str | int, red: str | int) -> None:
         self.nir = nir
         self.red = red
         super().__init__()
-    
+
     def compute(self, image: ee.Image):
         if isinstance(self.nir, int):
             self.nir = image.bandNames().get(self.nir)
         if isinstance(self.red, int):
             self.red = self.red.bandNames().get(self.red)
-        return image.normalizedDifference([self.nir, self.red]).rename('NDVI')
+        return image.normalizedDifference([self.nir, self.red]).rename("NDVI")
+
 
 class RasterCalc:
     def compute_ndvi(self, image: ee.Image, nir: str | int = 0, red: str | int = 1):

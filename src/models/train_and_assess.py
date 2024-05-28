@@ -13,11 +13,11 @@ def format_error_matrix_for_export(
 ) -> ee.featurecollection.FeatureCollection:
     # TODO implemet helper to add producers consumers overall order
     features = [
-        ee.Feature(None, {'confusion_matrix': matrix.array()}),
-        ee.Feature(None, {'order': matrix.order()}),
-        ee.Feature(None, {'producers': matrix.producersAccuracy().toList().flatten()}),
-        ee.Feature(None, {'consumers': matrix.consumersAccuracy().toList().flatten()}),
-        ee.Feature(None, {'overall': matrix.accuracy()}),
+        ee.Feature(None, {"confusion_matrix": matrix.array()}),
+        ee.Feature(None, {"order": matrix.order()}),
+        ee.Feature(None, {"producers": matrix.producersAccuracy().toList().flatten()}),
+        ee.Feature(None, {"consumers": matrix.consumersAccuracy().toList().flatten()}),
+        ee.Feature(None, {"overall": matrix.accuracy()}),
     ]
 
     return ee.FeatureCollection(features)
@@ -28,8 +28,8 @@ def train_smile_random_forest_and_assess(
     n_trees: int = 1000,
     label_col: str = "class_name",
     remove_props: list = None,
-    split_column: str = 'random',
-    split: float = 0.7
+    split_column: str = "random",
+    split: float = 0.7,
 ) -> tuple[SmileRandomForest, ee.confusionmatrix.ConfusionMatrix]:
 
     to_remove = ["system:index", "random", "eco_region", "class_name"]
@@ -56,7 +56,9 @@ def save_model(model_name: str, model: SmileRandomForest) -> int:
     print(f"Exporting Model: {model_name}")
     status_code = monitor_task(model_task)
     if status_code > 0:
-        raise RuntimeError(f"An error occurred while saving the model. Exit code: {status_code}")
+        raise RuntimeError(
+            f"An error occurred while saving the model. Exit code: {status_code}"
+        )
     return status_code
 
 
@@ -69,23 +71,24 @@ def save_confusion_matrix_to_drive(obj, folder, name) -> None:
         description="",
         folder=folder,
         fileNamePrefix=name,
-        fileFormat='GeoJSON'
+        fileFormat="GeoJSON",
     )
-    
+
     task.start()
     return None
+
 
 def main(args: list[str]) -> int:
     if len(args) != 1:
         raise RuntimeError("Invalid Number of Args. Must be exactly one argument")
-    
-    sample_id = args[0]
-    basename = sample_id.split("/")[-1].split('_')[0]
-    model_basename = f"{basename}_rf_model"
-    model_name = "/".join(sample_id.split('/')[:-2]) + f'/models/{model_basename}'
 
-    matrix_destination = 'nb_lidar_assessments'
-    matrix_name = f'{model_basename}_confusion_matrix'
+    sample_id = args[0]
+    basename = sample_id.split("/")[-1].split("_")[0]
+    model_basename = f"{basename}_rf_model"
+    model_name = "/".join(sample_id.split("/")[:-2]) + f"/models/{model_basename}"
+
+    matrix_destination = "nb_lidar_assessments"
+    matrix_name = f"{model_basename}_confusion_matrix"
 
     features = ee.FeatureCollection(sample_id)
 
@@ -93,9 +96,10 @@ def main(args: list[str]) -> int:
 
     save_confusion_matrix_to_drive(cfm, folder=matrix_destination, name=matrix_name)
     save_model(model_name=model_name, model=model)
-    
+
     return 0
 
-if __name__ == '__main__':
-    ee.Initialize(project='nb-lidar')
+
+if __name__ == "__main__":
+    ee.Initialize(project="nb-lidar")
     main(sys.argv[1:])
