@@ -4,21 +4,22 @@ import ee
 from src.helpers import rsd
 from src.helpers import calcs
 
+
 ## Optical Raster Calcs
 def _compute_ndvi(image, nir, red):
-    return image.normalizedDifference([nir, red]).rename('NDVI')
+    return image.normalizedDifference([nir, red]).rename("NDVI")
 
 
 def _compute_savi(image, nir, red) -> ee.Image:
     return image.expression(
-            "(1 + L) * (NIR - RED) / (NIR + RED + L)",
-            {"NIR": image.select(nir), "RED": image.select(red), "L": L},
-        ).rename("SAVI")
+        "(1 + L) * (NIR - RED) / (NIR + RED + L)",
+        {"NIR": image.select(nir), "RED": image.select(red), "L": L},
+    ).rename("SAVI")
 
 
 def _compute_tasseled_cap(image, *bands) -> ee.Image:
     if not bands:
-        bands = list(range(0,6))
+        bands = list(range(0, 6))
     else:
         bands = list(bands)
 
