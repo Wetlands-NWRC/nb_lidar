@@ -1,30 +1,49 @@
-# -*- coding: utf-8 -*-
-import click
-import logging
+import ee
+import json
+
 from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
+
+import ee.batch
 
 
-@click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
-    """
-    logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+ASSET_ID = "projects/nb-lidar/assets/nb_south_training"
+OUT_NAME = "projects/nb-lidar/assets/nb_south_features"
+LABEL_COL = "class_name"
 
 
-if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+def make_ee_dataset(asset_id: str, label_col: str, out_name: str):
+    features = ee.FeatureCollection(asset_id)
 
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
+    # remapl labels to int
+    old_labels = features.aggregate_array(label_col).distinct()
+    new_labels = ee.List.sequence(1, old_labels.size())
 
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
+    features = features.remap(old_labels, new_labels, label_col)
 
-    main()
+    # add a random column for tain and test assignment
+    features = features.randomColumn()
+
+    # write out a lookup
+
+    # send to to reference folder
+    data = ee.Dictionary.fromLists(old_labels, new_labels).getInfo()
+
+    current_location = Path(__file__).absolute()
+    destination_location = current_location.parent.parent.parent / Path(
+        "references/lookup.json"
+    )
+    with open(destination_location, "w") as fh:
+        json.dump(data, fh, indent=4)
+
+    task = ee.batch.Export.table.toAsset(
+        collection=features, assetId=out_name, description=""
+    )
+
+    task.start()
+
+    return
+
+
+if __name__ == "__main__":
+    ee.Initialize(project="nb-lidar")
+    make_ee_dataset(ASSET_ID, LABEL_COL, OUT_NAME)

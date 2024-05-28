@@ -1,0 +1,10 @@
+{
+    "Bog": 6,
+    "Fen": 4,
+    "Marsh": 5,
+    "Open water": 1,
+    "Salt marsh": 7,
+    "Shallow water": 2,
+    "Swamp": 3,
+    "Upland": 8
+}
