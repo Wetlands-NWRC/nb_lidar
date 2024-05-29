@@ -100,7 +100,7 @@ def fetch_and_proeces_s2_sr_seasonal(
         rsd.Sentinel2SR()
         .filterBounds(aoi)
         .filterDate("2019", "2022")
-        .filter(ee.Filter.dayOfYear())
+        .filter(ee.Filter.dayOfYear(91, 263))
         .filterClouds(1)
         .sort("CLOUDY_PIXEL_PERCENTAGE", False)
         .median()
@@ -145,4 +145,13 @@ def fetch_dsm_ta() -> ee.Image:
 
 def fetch_srtm_ta() -> ee.Image:
     return rsd.TerrainSRTM()
+
+
+def fetch_terrain(type) -> ee.Image:
+    factory = {
+        'dtm': fetch_dtm_ta,
+        'dsm': fetch_srtm_ta,
+        'srtm': fetch_srtm_ta,
+    }
+    return factory[type]()
 
