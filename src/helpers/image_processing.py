@@ -121,6 +121,32 @@ def fetch_and_proeces_s2_sr_seasonal(
     return s2sr_dataset
 
 
+def fetch_and_process_alos() -> ee.Image:
+    return (
+        rsd.AlosPalsar()
+        .filterDate("2018-01-01", "2022-01-01")
+        .median()
+        .convolve(ee.Kernel.square(1))
+        .select("H.*")
+    )
+
+
+def fetch_fourier_transform() -> ee.Image:
+    return rsd.FourierTransform().select("cos.*|sin.*|pha.*|amp.*")
+
+
+def fetch_dtm_ta() -> ee.Image:
+    return rsd.TerrainDTM()
+
+
+def fetch_dsm_ta() -> ee.Image:
+    return rsd.TerrainDSM()
+
+
+def fetch_srtm_ta() -> ee.Image:
+    return rsd.TerrainSRTM()
+
+
 def process_and_stack_images(aoi, terrain_type: str):
     s1 = (
         rsd.Sentinel1()
