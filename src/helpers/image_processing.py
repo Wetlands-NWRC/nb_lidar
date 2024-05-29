@@ -53,41 +53,28 @@ def _compute_tasseled_cap(image, *bands) -> ee.Image:
 def fetch_and_process_data_cube(aoi) -> ee.Image:
     """fetch and apply processing steps to Data Cube Composites"""
     dataset = (
-        rsd.DataCube()
-        .filterBounds(aoi)
-        .mosaic()
-        .select(".*_b[0][2-8].*|.*b[1][1-2].*")
+        rsd.DataCube().filterBounds(aoi).mosaic().select(".*_b[0][2-8].*|.*b[1][1-2].*")
     )
 
     # standardize bands
-    band_names = [
-        'B2',
-        'B3',
-        'B4',
-        'B5',
-        'B6',
-        'B7',
-        'B8',
-        'B8A',
-        'B11',
-        'B12'
-    ]
-    prefixs = ['a_spri.*', 'b_summ.*', 'c_fall.*']
-    
+    band_names = ["B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B11", "B12"]
+    prefixs = ["a_spri.*", "b_summ.*", "c_fall.*"]
+
     output_dataset = None
     for prefix in prefixs:
         input_dataset = dataset.select(prefix).rename(band_names)
-        ndvi = _compute_ndvi(input_dataset, 'B8', 'B4')
-        savi = _compute_savi(input_dataset, 'B8', 'B4')
-        tc = _compute_tasseled_cap(input_dataset, 'B2', 'B3', 'B4', 'B8', 'B11', 'B12')
+        ndvi = _compute_ndvi(input_dataset, "B8", "B4")
+        savi = _compute_savi(input_dataset, "B8", "B4")
+        tc = _compute_tasseled_cap(input_dataset, "B2", "B3", "B4", "B8", "B11", "B12")
         input_dataset = input_dataset.addBands(ndvi).addBands(savi).addBands(tc)
-        
+
         if output_dataset is None:
             output_dataset = input_dataset
             continue
         output_dataset = output_dataset.addBands(input_dataset)
 
     return output_dataset
+
 
 def process_and_stack_images(aoi, terrain_type: str):
     s1 = (
