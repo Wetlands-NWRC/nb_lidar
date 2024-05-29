@@ -2,7 +2,7 @@ import sys
 
 import ee
 import ee.image
-from src.helpers.image_processing import process_and_stack_images
+from src.image_processing import process_and_stack_images
 
 AOI_ID = "projects/nb-lidar/assets/aoi_nb_south"
 BUCKET = "eerfpl-exports"

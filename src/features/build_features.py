@@ -5,7 +5,7 @@ import ee.batch
 
 
 from src.utils.datautils import monitor_task, table_to_asset
-from src.helpers.image_processing import process_and_stack_images
+from src.image_processing import process_and_stack_images
 
 
 def build_elevation_features(
