@@ -76,6 +76,23 @@ def fetch_and_process_data_cube(aoi) -> ee.Image:
     return output_dataset
 
 
+def fetch_and_proecss_s1_seasonal(aoi):
+    """processing for Sentinel 1 seasonal composites"""
+    s1_dataset = (
+        rsd.Sentinel1()
+        .filterDate("2019-04-01", "2019-09-21")
+        .filterBounds(aoi)
+        .filterIWMode()
+        .filterDV()
+        .applyEdgeMask()
+        .median()
+        .select("V.*")
+        .convolve(ee.kernel.Kernel.square(1))
+    )
+    return s1_dataset
+
+
+
 def process_and_stack_images(aoi, terrain_type: str):
     s1 = (
         rsd.Sentinel1()
