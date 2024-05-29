@@ -92,6 +92,34 @@ def fetch_and_proecss_s1_seasonal(aoi):
     return s1_dataset
 
 
+def fetch_and_proeces_s2_sr_seasonal(
+    aoi, ndvi: bool = False, savi: bool = False, tasseled_cap: bool = False
+) -> ee.Image:
+    """processing chain for s2 sr seasonal composite"""
+    s2sr_dataset = (
+        rsd.Sentinel2SR()
+        .filterBounds(aoi)
+        .filterDate("2019", "2022")
+        .filter(ee.Filter.dayOfYear())
+        .filterClouds(1)
+        .sort("CLOUDY_PIXEL_PERCENTAGE", False)
+        .median()
+        .select("B[2-9].*|B1[1-2]")
+    )
+
+    if ndvi:
+        s2sr_dataset = s2sr_dataset.addBands(_compute_ndvi(s2sr_dataset, "B8", "B4"))
+
+    if savi:
+        s2sr_dataset = s2sr_dataset.addBands(_compute_savi(s2sr_dataset, "B8", "B4"))
+
+    if tasseled_cap:
+        s2sr_dataset = s2sr_dataset.addBands(
+            _compute_tasseled_cap(s2sr_dataset, "B2", "B3", "B4", "B8", "B11", "B12")
+        )
+
+    return s2sr_dataset
+
 
 def process_and_stack_images(aoi, terrain_type: str):
     s1 = (
