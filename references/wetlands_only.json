@@ -1,0 +1,8 @@
+{
+    "Bog": 1,
+    "Fen": 2,
+    "Marsh": 3,
+    "Salt marsh": 4,
+    "Shallow water": 5,
+    "Swamp": 6
+}

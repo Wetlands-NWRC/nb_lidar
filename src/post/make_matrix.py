@@ -8,7 +8,7 @@ import pandas as pd
 from pathlib import Path
 from typing import Any
 
-LOOKUP_FILE = Path(__file__).parent.parent.parent / Path("references/3_class.json")
+LOOKUP_FILE = Path(__file__).parent.parent.parent / Path("references/wetlands_only.json")
 
 
 def load_data(filename) -> dict[str, Any]:
