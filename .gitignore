@@ -91,3 +91,5 @@ target/
 .conda/
 
 .conda/
+.vscode/
+.pytest_cache/

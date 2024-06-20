@@ -10,4 +10,10 @@ dependencies:
   - matplotlib
   - ipykernel
   - python-dotenv
+  - ruff
+  - pip
+  - pip:
+    - geersd
+    - geeft
+    - e .
 prefix: C:\Users\rhamilton\LiDAR\working\10-github\nb_lidar\.conda
